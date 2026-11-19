@@ -1496,3 +1496,8 @@ Sign in to a website	Войти на сайт
 Some shared files could not be hard-linked and were copied instead ({size}).	Некоторые общие файлы не удалось связать жёсткими ссылками, и они были скопированы ({size}).
 This server lists several chat models. Choose one:	Этот сервер предлагает несколько моделей для чата. Выберите одну:
 Choose a model	Выберите модель
+The build stopped after two builder turns changed no files in app/.	Сборка остановилась, потому что строитель два цикла подряд не изменил ни одного файла в app/.
+The build stopped after two builder turns changed no files in the project folder.	Сборка остановилась, потому что строитель два цикла подряд не изменил ни одного файла в папке проекта.
+The build stopped after two builder turns changed no files in app/. app/ has no files yet, so the builder hasn't written the project.	Сборка остановилась, потому что строитель два цикла подряд не изменил ни одного файла в app/. В app/ пока нет файлов, значит проект ещё не написан.
+Send a new request with a concrete correction, or edit the app's files before trying again.	Отправьте новый запрос с конкретным исправлением или отредактируйте файлы приложения перед повторной попыткой.
+Send a new request that asks for the project's files in app/ (such as package.json and index.html), or try another builder.	Отправьте новый запрос с просьбой создать файлы проекта в app/ (например, package.json и index.html), или попробуйте другого строителя.

@@ -1496,3 +1496,8 @@ Sign in to a website	Bei einer Website anmelden
 Some shared files could not be hard-linked and were copied instead ({size}).	Einige geteilte Dateien konnten nicht hart verlinkt werden und wurden kopiert ({size}).
 This server lists several chat models. Choose one:	Dieser Server bietet mehrere Chat-Modelle an. Wähle eines:
 Choose a model	Modell wählen
+The build stopped after two builder turns changed no files in app/.	Der Build wurde angehalten, weil der Builder zwei Durchgänge lang keine Dateien in app/ geändert hat.
+The build stopped after two builder turns changed no files in the project folder.	Der Build wurde angehalten, weil der Builder zwei Durchgänge lang keine Dateien im Projektordner geändert hat.
+The build stopped after two builder turns changed no files in app/. app/ has no files yet, so the builder hasn't written the project.	Der Build wurde angehalten, weil der Builder zwei Durchgänge lang keine Dateien in app/ geändert hat. app/ enthält noch keine Dateien, das Projekt wurde also noch nicht geschrieben.
+Send a new request with a concrete correction, or edit the app's files before trying again.	Sende eine neue Anfrage mit einer konkreten Korrektur, oder bearbeite die Dateien der App, bevor du es erneut versuchst.
+Send a new request that asks for the project's files in app/ (such as package.json and index.html), or try another builder.	Sende eine neue Anfrage, die nach den Projektdateien in app/ fragt (wie package.json und index.html), oder probiere einen anderen Builder.

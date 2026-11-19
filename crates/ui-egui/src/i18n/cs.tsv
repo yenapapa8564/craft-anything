@@ -1496,3 +1496,8 @@ Sign in to a website	Přihlásit se na web
 Some shared files could not be hard-linked and were copied instead ({size}).	Některé sdílené soubory nešlo pevně propojit a byly zkopírovány ({size}).
 This server lists several chat models. Choose one:	Tento server nabízí několik chatovacích modelů. Vyberte jeden:
 Choose a model	Vyberte model
+The build stopped after two builder turns changed no files in app/.	Sestavení se zastavilo, protože stavitel ve dvou tazích nezměnil žádné soubory ve složce app/.
+The build stopped after two builder turns changed no files in the project folder.	Sestavení se zastavilo, protože stavitel ve dvou tazích nezměnil žádné soubory ve složce projektu.
+The build stopped after two builder turns changed no files in app/. app/ has no files yet, so the builder hasn't written the project.	Sestavení se zastavilo, protože stavitel ve dvou tazích nezměnil žádné soubory ve složce app/. Ve složce app/ zatím nejsou žádné soubory, takže projekt ještě nebyl napsán.
+Send a new request with a concrete correction, or edit the app's files before trying again.	Pošlete nový požadavek s konkrétní opravou, nebo před dalším pokusem soubory aplikace upravte sami.
+Send a new request that asks for the project's files in app/ (such as package.json and index.html), or try another builder.	Pošlete nový požadavek, který žádá o soubory projektu ve složce app/ (například package.json a index.html), nebo zkuste jiného stavitele.

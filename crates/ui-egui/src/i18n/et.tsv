@@ -1496,3 +1496,8 @@ Sign in to a website	Logi veebisaidile sisse
 Some shared files could not be hard-linked and were copied instead ({size}).	Mõnda jagatud faili ei saanud kõvasti linkida ja need kopeeriti ({size}).
 This server lists several chat models. Choose one:	See server pakub mitut vestlusmudelit. Vali üks:
 Choose a model	Vali mudel
+The build stopped after two builder turns changed no files in app/.	Ehitus peatus, sest looja ei muutnud kahe vooru jooksul app/ kaustas ühtegi faili.
+The build stopped after two builder turns changed no files in the project folder.	Ehitus peatus, sest looja ei muutnud kahe vooru jooksul projektikaustas ühtegi faili.
+The build stopped after two builder turns changed no files in app/. app/ has no files yet, so the builder hasn't written the project.	Ehitus peatus, sest looja ei muutnud kahe vooru jooksul app/ kaustas ühtegi faili. Kaustas app/ pole veel ühtegi faili, seega projekti pole veel kirjutatud.
+Send a new request with a concrete correction, or edit the app's files before trying again.	Saada uus päring konkreetse parandusega või muuda enne uuesti proovimist ise rakenduse faile.
+Send a new request that asks for the project's files in app/ (such as package.json and index.html), or try another builder.	Saada uus päring, mis palub app/ kausta projekti failid (näiteks package.json ja index.html), või proovi mõnda teist loojat.

@@ -1438,10 +1438,13 @@ fn draw_items(
                         ui.set_width(ui.available_width());
                         ui.horizontal(|ui| {
                             icons::show(ui, "triangle-alert", theme::icon::MD, t.danger);
-                            ui.add(egui::Label::new(RichText::new(message).color(t.text)).wrap());
+                            // The engine builds this English, so a catalog entry keyed on its exact
+                            // text (the i18n doc's "English strings in code are the lookup keys")
+                            // is the only way to translate it; untranslated ones just stay English.
+                            ui.add(egui::Label::new(RichText::new(tr(message)).color(t.text)).wrap());
                         });
                         if let Some(r) = remediation {
-                            ui.add(egui::Label::new(RichText::new(r).color(t.text_dim)).wrap());
+                            ui.add(egui::Label::new(RichText::new(tr(r)).color(t.text_dim)).wrap());
                         }
                         if let Some(l) = log
                             && widgets::open_log_button(ui, l)

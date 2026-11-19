@@ -1496,3 +1496,8 @@ Sign in to a website	웹사이트에 로그인
 Some shared files could not be hard-linked and were copied instead ({size}).	일부 공유 파일은 하드 링크할 수 없어 복사했습니다 ({size}).
 This server lists several chat models. Choose one:	이 서버에는 채팅 모델이 여러 개 있습니다. 하나를 고르세요:
 Choose a model	모델 선택
+The build stopped after two builder turns changed no files in app/.	빌더가 두 번 연속 app/ 안의 파일을 하나도 바꾸지 않아서 빌드를 멈췄습니다.
+The build stopped after two builder turns changed no files in the project folder.	빌더가 두 번 연속 프로젝트 폴더 안의 파일을 하나도 바꾸지 않아서 빌드를 멈췄습니다.
+The build stopped after two builder turns changed no files in app/. app/ has no files yet, so the builder hasn't written the project.	빌더가 두 번 연속 app/ 안의 파일을 하나도 바꾸지 않아서 빌드를 멈췄습니다. app/에 아직 파일이 없어서, 빌더가 프로젝트를 작성하지 않은 상태입니다.
+Send a new request with a concrete correction, or edit the app's files before trying again.	구체적인 수정 요청을 새로 보내거나, 다시 시도하기 전에 앱 파일을 직접 편집해보세요.
+Send a new request that asks for the project's files in app/ (such as package.json and index.html), or try another builder.	app/ 안에 프로젝트 파일(예: package.json과 index.html)을 만들어달라는 요청을 새로 보내거나, 다른 빌더를 써보세요.

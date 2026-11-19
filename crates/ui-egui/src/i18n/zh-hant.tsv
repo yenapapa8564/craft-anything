@@ -1496,3 +1496,8 @@ Sign in to a website	登入網站
 Some shared files could not be hard-linked and were copied instead ({size}).	部分共用檔案無法建立硬連結，已改為複製（{size}）。
 This server lists several chat models. Choose one:	此伺服器提供多個聊天模型。請選擇一個：
 Choose a model	選擇模型
+The build stopped after two builder turns changed no files in app/.	建置已停止，因為建置者連續兩輪都沒有修改 app/ 中的任何檔案。
+The build stopped after two builder turns changed no files in the project folder.	建置已停止，因為建置者連續兩輪都沒有修改專案資料夾中的任何檔案。
+The build stopped after two builder turns changed no files in app/. app/ has no files yet, so the builder hasn't written the project.	建置已停止，因為建置者連續兩輪都沒有修改 app/ 中的任何檔案。app/ 目前還沒有任何檔案，表示專案還沒有被寫入。
+Send a new request with a concrete correction, or edit the app's files before trying again.	傳送一個包含具體修正內容的新請求，或是在重試之前自行編輯應用程式的檔案。
+Send a new request that asks for the project's files in app/ (such as package.json and index.html), or try another builder.	傳送一個新請求，要求在 app/ 中建立專案檔案（例如 package.json 和 index.html），或是換一個建置者試試看。

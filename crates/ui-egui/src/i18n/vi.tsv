@@ -1496,3 +1496,8 @@ Sign in to a website	Đăng nhập vào một trang web
 Some shared files could not be hard-linked and were copied instead ({size}).	Một số tệp chia sẻ không thể tạo liên kết cứng nên đã được sao chép ({size}).
 This server lists several chat models. Choose one:	Máy chủ này có nhiều mô hình trò chuyện. Hãy chọn một:
 Choose a model	Chọn mô hình
+The build stopped after two builder turns changed no files in app/.	Quá trình build đã dừng vì trình xây dựng không thay đổi tệp nào trong app/ sau hai lượt.
+The build stopped after two builder turns changed no files in the project folder.	Quá trình build đã dừng vì trình xây dựng không thay đổi tệp nào trong thư mục dự án sau hai lượt.
+The build stopped after two builder turns changed no files in app/. app/ has no files yet, so the builder hasn't written the project.	Quá trình build đã dừng vì trình xây dựng không thay đổi tệp nào trong app/ sau hai lượt. app/ vẫn chưa có tệp nào, nên dự án vẫn chưa được viết.
+Send a new request with a concrete correction, or edit the app's files before trying again.	Hãy gửi một yêu cầu mới với chỉnh sửa cụ thể, hoặc tự chỉnh sửa tệp của ứng dụng trước khi thử lại.
+Send a new request that asks for the project's files in app/ (such as package.json and index.html), or try another builder.	Hãy gửi một yêu cầu mới yêu cầu tạo các tệp dự án trong app/ (như package.json và index.html), hoặc thử một trình xây dựng khác.

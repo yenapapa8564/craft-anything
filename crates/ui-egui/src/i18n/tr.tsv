@@ -1496,3 +1496,8 @@ Sign in to a website	Bir web sitesinde oturum aç
 Some shared files could not be hard-linked and were copied instead ({size}).	Bazı paylaşılan dosyalar sabit bağlantıyla bağlanamadı ve kopyalandı ({size}).
 This server lists several chat models. Choose one:	Bu sunucuda birden fazla sohbet modeli var. Birini seçin:
 Choose a model	Bir model seçin
+The build stopped after two builder turns changed no files in app/.	Yapılandırıcı iki tur boyunca app/ içinde hiçbir dosyayı değiştirmediği için derleme durdu.
+The build stopped after two builder turns changed no files in the project folder.	Yapılandırıcı iki tur boyunca proje klasöründe hiçbir dosyayı değiştirmediği için derleme durdu.
+The build stopped after two builder turns changed no files in app/. app/ has no files yet, so the builder hasn't written the project.	Yapılandırıcı iki tur boyunca app/ içinde hiçbir dosyayı değiştirmediği için derleme durdu. app/ içinde henüz dosya yok, yani proje henüz yazılmadı.
+Send a new request with a concrete correction, or edit the app's files before trying again.	Somut bir düzeltme isteyen yeni bir istek gönderin veya yeniden denemeden önce uygulamanın dosyalarını kendiniz düzenleyin.
+Send a new request that asks for the project's files in app/ (such as package.json and index.html), or try another builder.	app/ içinde proje dosyalarını (package.json ve index.html gibi) isteyen yeni bir istek gönderin veya başka bir yapılandırıcı deneyin.

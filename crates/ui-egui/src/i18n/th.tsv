@@ -1496,3 +1496,8 @@ Sign in to a website	ลงชื่อเข้าใช้เว็บไซ�
 Some shared files could not be hard-linked and were copied instead ({size}).	ไฟล์ที่แชร์บางไฟล์สร้างฮาร์ดลิงก์ไม่ได้ จึงคัดลอกแทน ({size})
 This server lists several chat models. Choose one:	เซิร์ฟเวอร์นี้มีโมเดลแชตหลายตัว เลือกหนึ่งตัว:
 Choose a model	เลือกโมเดล
+The build stopped after two builder turns changed no files in app/.	การบิลด์หยุดลงเพราะผู้สร้างไม่ได้เปลี่ยนไฟล์ใดๆ ใน app/ เลยตลอดสองรอบ
+The build stopped after two builder turns changed no files in the project folder.	การบิลด์หยุดลงเพราะผู้สร้างไม่ได้เปลี่ยนไฟล์ใดๆ ในโฟลเดอร์โปรเจกต์เลยตลอดสองรอบ
+The build stopped after two builder turns changed no files in app/. app/ has no files yet, so the builder hasn't written the project.	การบิลด์หยุดลงเพราะผู้สร้างไม่ได้เปลี่ยนไฟล์ใดๆ ใน app/ เลยตลอดสองรอบ ตอนนี้ app/ ยังไม่มีไฟล์เลย แปลว่ายังไม่มีการเขียนโปรเจกต์
+Send a new request with a concrete correction, or edit the app's files before trying again.	ส่งคำขอใหม่พร้อมการแก้ไขที่ชัดเจน หรือแก้ไขไฟล์ของแอปเองก่อนลองใหม่
+Send a new request that asks for the project's files in app/ (such as package.json and index.html), or try another builder.	ส่งคำขอใหม่ที่ขอให้สร้างไฟล์โปรเจกต์ใน app/ (เช่น package.json และ index.html) หรือลองใช้ผู้สร้างคนอื่น

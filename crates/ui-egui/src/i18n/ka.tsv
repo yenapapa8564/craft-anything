@@ -1496,3 +1496,8 @@ Sign in to a website	ვებსაიტზე შესვლა
 Some shared files could not be hard-linked and were copied instead ({size}).	ზოგიერთი საერთო ფაილი მყარი ბმულით ვერ დაკავშირდა და დაკოპირდა ({size}).
 This server lists several chat models. Choose one:	ეს სერვერი რამდენიმე ჩატის მოდელს გვთავაზობს. აირჩიეთ ერთი:
 Choose a model	აირჩიეთ მოდელი
+The build stopped after two builder turns changed no files in app/.	აგება შეჩერდა, რადგან მშენებელმა ზედიზედ ორ ნაბიჯში ვერცერთი ფაილი ვერ შეცვალა app/-ში.
+The build stopped after two builder turns changed no files in the project folder.	აგება შეჩერდა, რადგან მშენებელმა ზედიზედ ორ ნაბიჯში ვერცერთი ფაილი ვერ შეცვალა პროექტის საქაღალდეში.
+The build stopped after two builder turns changed no files in app/. app/ has no files yet, so the builder hasn't written the project.	აგება შეჩერდა, რადგან მშენებელმა ზედიზედ ორ ნაბიჯში ვერცერთი ფაილი ვერ შეცვალა app/-ში. app/-ში ჯერჯერობით ფაილები არ არის, ანუ პროექტი ჯერ არ დაწერილა.
+Send a new request with a concrete correction, or edit the app's files before trying again.	გაუგზავნეთ ახალი მოთხოვნა კონკრეტული შესწორებით, ან ხელახლა ცდამდე თავად შეასწორეთ აპის ფაილები.
+Send a new request that asks for the project's files in app/ (such as package.json and index.html), or try another builder.	გაუგზავნეთ ახალი მოთხოვნა, რომელიც სთხოვს app/-ში პროექტის ფაილებს (მაგალითად package.json და index.html), ან სცადეთ სხვა მშენებელი.
