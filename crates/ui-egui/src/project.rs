@@ -1022,6 +1022,7 @@ fn side(app: &mut CraftApp, ui: &mut Ui, ws: &Workspace) {
         crate::manage::delete_row(app, ui, ws);
     });
     ui.add_space(theme::space::LG);
+    crate::builders::plan_usage_card(app, ui);
 }
 
 /// How to see what was made: open the built site, or start the built program.
@@ -1854,7 +1855,6 @@ fn composer(app: &mut CraftApp, ui: &mut Ui, width: f32, t: &Tokens, last_waitin
         ui.horizontal(|ui| {
             crate::builders::built_by_project(app, ui, current_builder.as_deref());
         });
-        crate::builders::plan_usage_project(app, ui, current_builder.as_deref());
     });
     ui.add_space(theme::space::XS);
     ui.allocate_ui(Vec2::new(width, 0.0), |ui| {

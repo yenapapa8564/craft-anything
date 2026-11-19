@@ -757,7 +757,7 @@ impl egui::Widget for DonutGauge {
                     (0..=n).map(|i| center + radius * egui::vec2((start + sweep * i as f32 / n as f32).cos(), (start + sweep * i as f32 / n as f32).sin())).collect();
                 painter.add(egui::Shape::line(points, Stroke::new(self.stroke, color)));
             }
-            let pct = format!("{:.0}%", self.fraction * 100.0);
+            let pct = format!("{:.0}", self.fraction * 100.0);
             painter.text(center, egui::Align2::CENTER_CENTER, pct, theme::semibold(theme::CAPTION), t.text);
         }
         response

@@ -8,7 +8,7 @@ use crate::theme::{self, Tokens};
 use crate::{CraftApp, icons, widgets};
 use craft_anything_ai::rebuild::replaced_builder_notice;
 use craft_anything_ai::{BackendConfig, BackendKind};
-use egui::{RichText, Ui, Vec2};
+use egui::{Color32, RichText, Ui, Vec2};
 
 /// A live agent catalogue and a draft selection, tied to the settings that were queried.
 pub struct AgentModelPicker {
@@ -448,38 +448,44 @@ pub fn built_by_project(app: &mut CraftApp, ui: &mut Ui, current: Option<&str>) 
     }
 }
 
-/// How much of the project's current builder's plan it has used, as donuts next to "Built by"
-/// (Claude Code, Antigravity only; other backends don't report this). Checked on demand, since
-/// it calls out to the agent's own CLI.
-pub fn plan_usage_project(app: &mut CraftApp, ui: &mut Ui, current: Option<&str>) {
-    let Some(default) = app.default_builder() else { return };
-    let choices = app.builder_choices();
-    let name = current.filter(|c| choices.iter().any(|ch| ch.name == *c)).map(str::to_string).unwrap_or(default);
-    let Some(b) = app.backends.iter().find(|b| b.name == name).cloned() else { return };
-    if b.kind != BackendKind::AgentCli || b.ssh_host.as_deref().is_some_and(|h| !h.trim().is_empty()) {
-        return;
-    }
-    let ids = craft_anything_ai::cli_agents::adapter_for(&b.model).ids();
-    if !ids.contains(&"claude-code") && !ids.contains(&"antigravity") {
-        return;
-    }
+/// The connected AIs that can report plan usage (Claude Code, Antigravity; not over SSH), in the
+/// order they're set up.
+fn usage_backends(app: &CraftApp) -> Vec<BackendConfig> {
+    app.backends
+        .iter()
+        .filter(|b| b.enabled && b.kind == BackendKind::AgentCli && b.ssh_host.as_deref().is_none_or(|h| h.trim().is_empty()))
+        .filter(|b| {
+            let ids = craft_anything_ai::cli_agents::adapter_for(&b.model).ids();
+            ids.contains(&"claude-code") || ids.contains(&"antigravity")
+        })
+        .cloned()
+        .collect()
+}
+
+/// One AI's usage row: donuts once checked, a "Check plan usage" link until then.
+fn usage_row(app: &mut CraftApp, ui: &mut Ui, name: &str) {
     let t = Tokens::get(ui.ctx());
     let mut fetch = false;
-    ui.horizontal(|ui| {
-        match app.plan_usage.get(&b.name) {
+    // A plain vertical stack, not a row: the side panel can be narrower than two gauges plus
+    // "Refresh" side by side, and a plain horizontal just overflowed past its edge instead of
+    // moving things down, clipping whatever came before it on the same line too.
+    ui.vertical(|ui| {
+        match app.plan_usage.get(name) {
             None => {
                 if widgets::link(ui, "Check plan usage").clicked() {
                     fetch = true;
                 }
             }
             Some(None) => {
-                ui.add(widgets::Spinner::new().size(theme::CAPTION).color(t.accent));
-                ui.label(RichText::new(tr("Checking plan usage…")).color(t.text_faint).size(theme::CAPTION));
+                ui.horizontal(|ui| {
+                    ui.add(widgets::Spinner::new().size(theme::CAPTION).color(t.accent));
+                    ui.label(RichText::new(tr("Checking plan usage…")).color(t.text_faint).size(theme::CAPTION));
+                });
             }
             Some(Some(Err(e))) => {
                 ui.add(
                     egui::Label::new(RichText::new(trf("Couldn't check plan usage: {error}", &[("error", e)])).color(t.warning).size(theme::CAPTION))
-                        .truncate(),
+                        .wrap(),
                 );
                 if widgets::link(ui, "Try again").clicked() {
                     fetch = true;
@@ -492,27 +498,65 @@ pub fn plan_usage_project(app: &mut CraftApp, ui: &mut Ui, current: Option<&str>
                 }
             }
             Some(Some(Ok(usage))) => {
-                let gauge = |ui: &mut Ui, pct: f64, label: &str| {
-                    ui.vertical(|ui| {
-                        ui.add(widgets::DonutGauge::new((pct / 100.0) as f32).diameter(40.0).color(if pct >= 90.0 { t.warning } else { t.accent }));
+                // Shown as what's left, not what's spent, coloured the way Claude Code and
+                // Antigravity themselves grade their own quota: plenty left reads as safe, little
+                // left as urgent. Side by side, each ring over its caption; wrapped, so a panel
+                // too narrow for both moves the second one down instead of clipping it. Each
+                // column has a fixed width: `vertical_centered` would take the whole row's width
+                // for itself, so two of them (plus Refresh) overflowed the side panel.
+                // A plain yellow reads as "caution" more clearly than the theme's own amber-brown
+                // warning colour, which this gauge's small ring rendered as muddy.
+                const YELLOW: Color32 = Color32::from_rgb(0xf5, 0xc5, 0x18);
+                let gauge = |ui: &mut Ui, used_pct: f64, label: &str| {
+                    let remaining = (100.0 - used_pct).clamp(0.0, 100.0);
+                    let color = if remaining > 50.0 { t.success } else if remaining > 20.0 { YELLOW } else { t.danger };
+                    ui.allocate_ui_with_layout(Vec2::new(56.0, 56.0), egui::Layout::top_down(egui::Align::Center), |ui| {
+                        ui.add(widgets::DonutGauge::new((remaining / 100.0) as f32).diameter(36.0).color(color))
+                            .on_hover_text(trf("{pct} of its {label} left", &[("pct", &format!("{remaining:.0}%")), ("label", &tr(label).to_lowercase())]));
                         ui.label(RichText::new(tr(label)).color(t.text_faint).size(theme::CAPTION));
                     });
                 };
-                if let Some(s) = usage.session_used_percent {
-                    gauge(ui, s, "Session");
-                }
-                if let Some(w) = usage.weekly_used_percent {
-                    gauge(ui, w, "Week");
-                }
-                if widgets::link(ui, "Refresh").clicked() {
-                    fetch = true;
-                }
+                ui.horizontal_wrapped(|ui| {
+                    ui.spacing_mut().item_spacing.x = theme::space::MD;
+                    if let Some(s) = usage.session_used_percent {
+                        gauge(ui, s, "Session");
+                    }
+                    if let Some(w) = usage.weekly_used_percent {
+                        gauge(ui, w, "Week");
+                    }
+                    if widgets::link(ui, "Refresh").clicked() {
+                        fetch = true;
+                    }
+                });
             }
         }
     });
     if fetch {
-        app.fetch_plan_usage(&b.name);
+        app.fetch_plan_usage(name);
     }
+}
+
+/// A card for the project's side panel: how much of its plan each connected AI (Claude Code,
+/// Antigravity) has used, one row per AI. Nothing shows when none of the connected AIs report
+/// this.
+pub fn plan_usage_card(app: &mut CraftApp, ui: &mut Ui) {
+    let t = Tokens::get(ui.ctx());
+    let backends = usage_backends(app);
+    if backends.is_empty() {
+        return;
+    }
+    widgets::card(&t).inner_margin(theme::pad::TIGHT).show(ui, |ui| {
+        ui.set_width(ui.available_width());
+        widgets::caption(ui, "AI usage");
+        for (i, b) in backends.iter().enumerate() {
+            if i > 0 {
+                ui.add_space(theme::space::XS);
+            }
+            ui.label(RichText::new(&b.name).size(theme::SMALL).color(t.text_dim));
+            usage_row(app, ui, &b.name);
+        }
+    });
+    ui.add_space(theme::space::LG);
 }
 
 /// Nothing can build yet: what was found on this computer (one click to use it), a way to look
