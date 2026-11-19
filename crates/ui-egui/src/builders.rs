@@ -187,6 +187,17 @@ impl CraftApp {
         });
     }
 
+    /// Ask a backend's own CLI how much of the person's plan it has used (Claude Code,
+    /// Antigravity only; Settings → AI's usage line). `None` while this is in flight.
+    pub fn fetch_plan_usage(&mut self, name: &str) {
+        let (hub, name) = (self.hub.clone(), name.to_string());
+        self.plan_usage.insert(name.clone(), None);
+        self.jobs.spawn(tr("Check an AI's plan usage"), false, move |_| {
+            let result = hub.plan_usage(&name);
+            Ok(crate::Done::PlanUsage { name, result })
+        });
+    }
+
     /// Capture the backend context and load its catalogue in a worker tagged with a fresh picker request id.
     /// If the session cannot be read, report the error and keep the existing draft.
     pub fn pick_agent_model(&mut self, name: &str) {
@@ -403,6 +414,104 @@ pub fn built_by(app: &mut CraftApp, ui: &mut Ui) {
     widgets::named(r.response, "Built by");
     if let Some(p) = pick {
         app.state.make.ai = p;
+    }
+}
+
+/// "Built by" for a project already started, on its own screen: the same choices as Make's
+/// picker, but each pick is saved at once (project_builder_set) since there's no Start to wait
+/// for. `current` is the project's saved choice (`None`: automatic). Without this, a project was
+/// stuck with whichever AI built it first: once a coding agent saves a session, only it can
+/// continue that conversation (project_builder_set itself has been reachable from the CLI and MCP
+/// for a while; this is the one place in the app window that was still missing it).
+pub fn built_by_project(app: &mut CraftApp, ui: &mut Ui, current: Option<&str>) {
+    let t = Tokens::get(ui.ctx());
+    let Some(default) = app.default_builder() else { return };
+    let choices = app.builder_choices();
+    let automatic = trf("Automatic ({name})", &[("name", &default)]);
+    let shown = current.filter(|c| choices.iter().any(|ch| ch.name == *c)).map(str::to_string).unwrap_or_else(|| automatic.clone());
+    ui.label(RichText::new(tr("Built by")).size(theme::SMALL).color(t.text_dim));
+    let mut pick = None;
+    let r = widgets::dropdown("built-by-project").selected_text(shown).width(200.0).show_ui(ui, |ui| {
+        if widgets::menu_item(ui, current.is_none(), &automatic).on_hover_text(tr("Whatever Settings → AI builds with.")).clicked() {
+            pick = Some(None);
+        }
+        for c in &choices {
+            let note = if c.found { format!("{} · {}", c.detail, tr("found on this computer; set up when you start")) } else { c.detail.clone() };
+            if widgets::menu_item(ui, current == Some(c.name.as_str()), &c.name).on_hover_text(note).clicked() {
+                pick = Some(Some(c.name.clone()));
+            }
+        }
+    });
+    widgets::named(r.response, "Built by");
+    if let Some(p) = pick {
+        app.set_project_builder(p);
+    }
+}
+
+/// How much of the project's current builder's plan it has used, as donuts next to "Built by"
+/// (Claude Code, Antigravity only; other backends don't report this). Checked on demand, since
+/// it calls out to the agent's own CLI.
+pub fn plan_usage_project(app: &mut CraftApp, ui: &mut Ui, current: Option<&str>) {
+    let Some(default) = app.default_builder() else { return };
+    let choices = app.builder_choices();
+    let name = current.filter(|c| choices.iter().any(|ch| ch.name == *c)).map(str::to_string).unwrap_or(default);
+    let Some(b) = app.backends.iter().find(|b| b.name == name).cloned() else { return };
+    if b.kind != BackendKind::AgentCli || b.ssh_host.as_deref().is_some_and(|h| !h.trim().is_empty()) {
+        return;
+    }
+    let ids = craft_anything_ai::cli_agents::adapter_for(&b.model).ids();
+    if !ids.contains(&"claude-code") && !ids.contains(&"antigravity") {
+        return;
+    }
+    let t = Tokens::get(ui.ctx());
+    let mut fetch = false;
+    ui.horizontal(|ui| {
+        match app.plan_usage.get(&b.name) {
+            None => {
+                if widgets::link(ui, "Check plan usage").clicked() {
+                    fetch = true;
+                }
+            }
+            Some(None) => {
+                ui.add(widgets::Spinner::new().size(theme::CAPTION).color(t.accent));
+                ui.label(RichText::new(tr("Checking plan usage…")).color(t.text_faint).size(theme::CAPTION));
+            }
+            Some(Some(Err(e))) => {
+                ui.add(
+                    egui::Label::new(RichText::new(trf("Couldn't check plan usage: {error}", &[("error", e)])).color(t.warning).size(theme::CAPTION))
+                        .truncate(),
+                );
+                if widgets::link(ui, "Try again").clicked() {
+                    fetch = true;
+                }
+            }
+            Some(Some(Ok(usage))) if usage.is_empty() => {
+                ui.label(RichText::new(tr("No plan usage reported.")).color(t.text_faint).size(theme::CAPTION));
+                if widgets::link(ui, "Try again").clicked() {
+                    fetch = true;
+                }
+            }
+            Some(Some(Ok(usage))) => {
+                let gauge = |ui: &mut Ui, pct: f64, label: &str| {
+                    ui.vertical(|ui| {
+                        ui.add(widgets::DonutGauge::new((pct / 100.0) as f32).diameter(40.0).color(if pct >= 90.0 { t.warning } else { t.accent }));
+                        ui.label(RichText::new(tr(label)).color(t.text_faint).size(theme::CAPTION));
+                    });
+                };
+                if let Some(s) = usage.session_used_percent {
+                    gauge(ui, s, "Session");
+                }
+                if let Some(w) = usage.weekly_used_percent {
+                    gauge(ui, w, "Week");
+                }
+                if widgets::link(ui, "Refresh").clicked() {
+                    fetch = true;
+                }
+            }
+        }
+    });
+    if fetch {
+        app.fetch_plan_usage(&b.name);
     }
 }
 

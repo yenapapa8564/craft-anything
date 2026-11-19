@@ -1845,6 +1845,15 @@ fn composer(app: &mut CraftApp, ui: &mut Ui, width: f32, t: &Tokens, last_waitin
             .map(|ws| outcome_words(&app.kinds, ws).change_hint)
             .unwrap_or("Ask for a change, e.g. \"make the header blue\" or \"add a contact form\""))
     };
+    // What built it so far isn't locked in: switching here takes effect from the next run.
+    let current_builder = app.workspace.as_ref().and_then(|w| w.manifest.builder.clone());
+    ui.allocate_ui(Vec2::new(width, 0.0), |ui| {
+        ui.horizontal(|ui| {
+            crate::builders::built_by_project(app, ui, current_builder.as_deref());
+        });
+        crate::builders::plan_usage_project(app, ui, current_builder.as_deref());
+    });
+    ui.add_space(theme::space::XS);
     ui.allocate_ui(Vec2::new(width, 0.0), |ui| {
         let previews = app.previews(ui.ctx(), &app.state.project_attachments.clone());
         let history = || {

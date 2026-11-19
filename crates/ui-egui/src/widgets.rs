@@ -707,6 +707,63 @@ impl egui::Widget for ProgressBar {
     }
 }
 
+/// A ring filled to `fraction`, with its percentage painted in the middle: how much of a plan's
+/// session or week an AI has used, as a glance rather than a sentence.
+#[must_use = "put it in a ui with `ui.add(widget);`"]
+pub struct DonutGauge {
+    fraction: f32,
+    diameter: f32,
+    stroke: f32,
+    color: Option<Color32>,
+}
+
+impl DonutGauge {
+    /// `fraction` from 0 to 1.
+    pub fn new(fraction: f32) -> Self {
+        Self { fraction: fraction.clamp(0.0, 1.0), diameter: 56.0, stroke: 6.0, color: None }
+    }
+
+    pub fn diameter(mut self, diameter: f32) -> Self {
+        self.diameter = diameter;
+        self
+    }
+
+    pub fn color(mut self, color: Color32) -> Self {
+        self.color = Some(color);
+        self
+    }
+}
+
+impl egui::Widget for DonutGauge {
+    fn ui(self, ui: &mut Ui) -> Response {
+        let (rect, response) = ui.allocate_exact_size(Vec2::splat(self.diameter), Sense::hover());
+        response.widget_info(|| {
+            let mut info = egui::WidgetInfo::new(egui::WidgetType::ProgressIndicator);
+            info.value = Some(f64::from(self.fraction) * 100.0);
+            info
+        });
+        if ui.is_rect_visible(rect) {
+            let t = Tokens::get(ui.ctx());
+            let color = self.color.unwrap_or(t.accent);
+            let center = rect.center();
+            let radius = self.diameter / 2.0 - self.stroke / 2.0;
+            let painter = ui.painter();
+            painter.circle_stroke(center, radius, Stroke::new(self.stroke, t.card_border));
+            if self.fraction > 0.0 {
+                let start = -std::f32::consts::FRAC_PI_2;
+                let sweep = std::f32::consts::TAU * self.fraction;
+                let n = ((radius * sweep.abs()).round() as usize).clamp(2, 128);
+                let points: Vec<egui::Pos2> =
+                    (0..=n).map(|i| center + radius * egui::vec2((start + sweep * i as f32 / n as f32).cos(), (start + sweep * i as f32 / n as f32).sin())).collect();
+                painter.add(egui::Shape::line(points, Stroke::new(self.stroke, color)));
+            }
+            let pct = format!("{:.0}%", self.fraction * 100.0);
+            painter.text(center, egui::Align2::CENTER_CENTER, pct, theme::semibold(theme::CAPTION), t.text);
+        }
+        response
+    }
+}
+
 /// A spinning arc for "working", drawn like egui's own `Spinner` but asking for its next frame at
 /// [`animate`]'s pace. egui's asks to be drawn again at once, every frame, for as long as it's on
 /// screen: a build or a page capture can run for an hour, and redrawing the whole window at the

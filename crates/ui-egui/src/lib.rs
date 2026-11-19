@@ -183,6 +183,11 @@ pub enum Done {
         cli_model: Option<String>,
         result: Result<craft_anything_ai::model_options::ModelTuning, ToolError>,
     },
+    /// How much of a backend's plan is used (Settings → AI's usage line).
+    PlanUsage {
+        name: String,
+        result: Result<craft_anything_ai::cli_agents::usage::PlanUsage, ToolError>,
+    },
     ModelChanged {
         name: String,
         model: String,
@@ -483,6 +488,9 @@ pub struct CraftApp {
     /// come (`None`: still asking).
     pub model_picker: Option<(String, Option<Vec<String>>)>,
     pub agent_model_picker: Option<builders::AgentModelPicker>,
+    /// Plan-quota usage asked from an agent's own CLI (Claude Code, Antigravity), by backend name;
+    /// `None` while the ask is in flight. Never persisted: a fresh read each time it's shown.
+    pub plan_usage: std::collections::BTreeMap<String, Option<Result<craft_anything_ai::cli_agents::usage::PlanUsage, String>>>,
     model_request: u64,
     pub model_tuning: std::collections::BTreeMap<String, ModelTuningDraft>,
     /// The agent app whose program the file dialog is choosing.
@@ -634,6 +642,7 @@ impl CraftApp {
             program_replaced: Default::default(),
             model_picker: None,
             agent_model_picker: None,
+            plan_usage: Default::default(),
             model_request: 0,
             model_tuning: Default::default(),
             picking_program_for: None,
@@ -1086,6 +1095,13 @@ impl CraftApp {
                     tr(if decide { "The builder will decide its questions and tell you what it chose." } else { "The builder's questions will come to you." }),
                     false,
                 );
+            }
+            ("project_builder_set", Ok(v)) => {
+                // What was saved (the person's other changes on disk come along).
+                if let Some(ws) = self.workspace.as_mut().filter(|w| v["project"].as_str().is_some_and(|p| w.root == std::path::Path::new(p))) {
+                    let _ = ws.reload();
+                }
+                self.toast(tr("Changed. It builds the project from its next run."), false);
             }
             ("project_pins_list" | "project_pin_create" | "project_pin_open" | "project_pin_stop" | "project_pin_rename" | "project_pin_delete", r) => {
                 self.pin_done(tool, r)
@@ -1690,6 +1706,9 @@ impl CraftApp {
                     self.toast(e.for_people(), true);
                 }
             },
+            Done::PlanUsage { name, result } => {
+                self.plan_usage.insert(name, Some(result.map_err(|e| e.for_people())));
+            }
             Done::AgentModelChoices { request, context, result } => {
                 // Keep a matching result even while the engine is busy. Settings invalidates
                 // changed contexts once it can read the session again; saving rechecks too.

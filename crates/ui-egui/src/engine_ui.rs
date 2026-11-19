@@ -439,6 +439,15 @@ impl CraftApp {
             self.state.modal = Some(Modal::Assets);
         }
     }
+
+    /// Choose the AI that builds the open project's later changes, through project_builder_set
+    /// (`None`: back to the app's own choice). A session another agent saved can't be resumed by
+    /// the new one, so this starts a fresh session with it from the next run.
+    pub fn set_project_builder(&mut self, name: Option<String>) {
+        let Some(root) = self.workspace.as_ref().map(|w| w.root.clone()) else { return };
+        let builder = name.unwrap_or_else(|| "default".to_string());
+        self.act("project_builder_set", serde_json::json!({"project": root, "builder": builder}), tr("Choose the project's builder"));
+    }
 }
 
 /// A provider's key field and its Save button; returns the key when Save is pressed.

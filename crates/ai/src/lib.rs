@@ -929,6 +929,24 @@ impl AiHub {
         cli_agents::adapter_for(&e.config.model).model_catalog(&e.config, &e.options, context.directory.as_deref(), &Stop::default())
     }
 
+    /// How much of the person's plan a backend's session and week have used, from the agent's own
+    /// CLI (Claude Code, Antigravity); other backends have no such reading. Blocking: run it off
+    /// the UI thread.
+    pub fn plan_usage(&self, name: &str) -> Result<cli_agents::usage::PlanUsage, ToolError> {
+        let e = self.entry(name)?;
+        if e.config.kind != BackendKind::AgentCli {
+            return Err(ToolError::invalid("Only a coding agent reports plan usage."));
+        }
+        let ids = cli_agents::adapter_for(&e.config.model).ids();
+        if ids.contains(&"claude-code") {
+            cli_agents::usage::fetch_claude_usage(&e.config, &e.options)
+        } else if ids.contains(&"antigravity") {
+            cli_agents::usage::fetch_antigravity_usage(&e.config, &e.options)
+        } else {
+            Err(ToolError::invalid("This AI doesn't report plan usage."))
+        }
+    }
+
     /// Set an agent's model and thinking together. None uses OpenCode's default.
     /// Discovery happens before taking the session lock, and stale settings aren't overwritten.
     pub fn set_agent_model(&self, name: &str, model: Option<&str>, thinking: Option<Effort>) -> Result<bool, ToolError> {

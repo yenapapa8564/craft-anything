@@ -15,6 +15,7 @@ pub mod grants;
 pub mod models;
 mod shared;
 pub mod unfinished;
+pub mod usage;
 
 pub(crate) use shared::SharedConversation;
 
