@@ -7,9 +7,38 @@ use super::*;
 
 pub struct Antigravity;
 
+/// The choice that means "no `--model`, Antigravity's own default".
+const ANTIGRAVITY_DEFAULT: &str = "default";
+
+/// From `agy models`: its id (what `--model` takes) and display name. Static, like Claude Code's
+/// own list (#469 asked for a way off a specific model stuck at capacity); `agy models` itself
+/// needs a live run to ask a server, so it isn't queried for this list.
+const MODELS: &[(&str, &str)] = &[
+    ("gemini-3.8-flash-high", "Gemini 3.8 Flash (High)"),
+    ("gemini-3.8-flash-medium", "Gemini 3.8 Flash (Medium)"),
+    ("gemini-3.8-flash-low", "Gemini 3.8 Flash (Low)"),
+    ("claude-sonnet-4-6", "Claude Sonnet 4.6 (Thinking)"),
+    ("claude-opus-4-6-thinking", "Claude Opus 4.6 (Thinking)"),
+    ("gpt-oss-120b-medium", "GPT-OSS 120B (Medium)"),
+];
+
 impl AgentAdapter for Antigravity {
     fn ids(&self) -> &'static [&'static str] {
         &["antigravity", "agy"]
+    }
+
+    fn model_in_use(&self, options: Option<&BackendOptions>) -> Option<String> {
+        Some(options.and_then(|options| options.cli_model.clone()).unwrap_or_else(|| "Antigravity default".into()))
+    }
+
+    fn model_choices(&self, _config: &BackendConfig, _options: &BackendOptions) -> Result<Vec<String>, ToolError> {
+        let mut models = vec![ANTIGRAVITY_DEFAULT.to_string()];
+        models.extend(MODELS.iter().map(|(id, _)| id.to_string()));
+        Ok(models)
+    }
+
+    fn default_model_token(&self) -> Option<&'static str> {
+        Some(ANTIGRAVITY_DEFAULT)
     }
 
     fn args(&self, cx: &ArgsCx) -> Vec<String> {

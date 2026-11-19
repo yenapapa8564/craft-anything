@@ -522,20 +522,18 @@ fn ai(app: &mut CraftApp, ui: &mut Ui) {
                                     ui.label(RichText::new(tr("Asking for its models…")).color(t.text_faint).size(theme::CAPTION));
                                 }
                                 Some((_, Some(models))) => {
-                                    // Claude Code with no choice saved passes no `--model`, so it uses
-                                    // the model its own settings name: `default` is what's shown. An
+                                    // An agent with no choice saved passes no `--model`, so it uses its
+                                    // own default: the adapter names which list entry means that. An
                                     // API backend's model is its saved `config.model`.
-                                    let claude_code =
-                                        b.kind == BackendKind::AgentCli && craft_anything_ai::cli_agents::adapter_for(&b.model).ids().contains(&"claude-code");
-                                    let picked = app.backend_options.get(&b.name).and_then(|o| o.cli_model.clone()).unwrap_or_else(|| {
-                                        if claude_code { craft_anything_ai::anthropic::CLAUDE_CODE_DEFAULT.to_string() } else { b.model.clone() }
-                                    });
+                                    let default_token =
+                                        (b.kind == BackendKind::AgentCli).then(|| craft_anything_ai::cli_agents::adapter_for(&b.model).default_model_token()).flatten();
+                                    let picked = app
+                                        .backend_options
+                                        .get(&b.name)
+                                        .and_then(|o| o.cli_model.clone())
+                                        .unwrap_or_else(|| default_token.map(str::to_string).unwrap_or_else(|| b.model.clone()));
                                     let shown = |m: &str| {
-                                        if m == craft_anything_ai::anthropic::CLAUDE_CODE_DEFAULT {
-                                            tr("Default (its own settings)").to_string()
-                                        } else {
-                                            m.to_string()
-                                        }
+                                        if Some(m) == default_token { tr("Default (its own settings)").to_string() } else { m.to_string() }
                                     };
                                     widgets::dropdown(("model", &b.name)).selected_text(shown(&picked)).show_ui(ui, |ui| {
                                         for m in models {

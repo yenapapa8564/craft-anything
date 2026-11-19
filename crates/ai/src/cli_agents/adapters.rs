@@ -148,6 +148,12 @@ pub trait AgentAdapter: Send + Sync {
     fn model_choices(&self, _config: &BackendConfig, _options: &BackendOptions) -> Result<Vec<String>, ToolError> {
         Ok(Vec::new())
     }
+    /// The entry in [`Self::model_choices`] that means "no `--model`, the agent's own default"
+    /// (shown as "Default (its own settings)"). `None` if this agent has no such entry, or offers
+    /// no choices at all.
+    fn default_model_token(&self) -> Option<&'static str> {
+        None
+    }
     /// Whether this adapter offers context and reasoning controls beyond the model selector.
     fn supports_model_tuning(&self) -> bool {
         false
@@ -460,6 +466,10 @@ impl AgentAdapter for ClaudeCode {
         let mut models = vec![crate::anthropic::CLAUDE_CODE_DEFAULT.to_string()];
         models.extend(crate::anthropic::MODELS.iter().map(|model| model.to_string()));
         Ok(models)
+    }
+
+    fn default_model_token(&self) -> Option<&'static str> {
+        Some(crate::anthropic::CLAUDE_CODE_DEFAULT)
     }
 
     fn args(&self, cx: &ArgsCx) -> Vec<String> {
